@@ -1,5 +1,3 @@
-import { relative } from "path";
-
 export type Key = string|number|symbol
 export type Keys = Key | Key[];
 export type MapKey = Key | null | undefined;
@@ -97,6 +95,9 @@ interface keyMapperByRecursiveOptions {
     startDepth:number;
     // 是否要删除其它的key
     deleOther?:boolean|null|undefined;
+
+    //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
+    keep?:boolean|null|undefined;
 }
 
 
@@ -106,7 +107,7 @@ interface keyMapperByRecursiveOptions {
  * @returns 
  */
 function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
-    const {source,keyMaps,maxDepth,startDepth,deleOther} = options;
+    const {source,keyMaps,maxDepth,startDepth,deleOther,keep} = options;
 
     if (maxDepth < startDepth ||  !(source && typeof source === "object") || Array.isArray(source) ){
         return source;
@@ -117,17 +118,16 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     
     for (const [key,value] of entries ){
         let newKey = keyMaps[key];
-        if (newKey === null){
+        if (newKey === null || (newKey === undefined && deleOther)){
             continue;
         }
 
         const newValue = keyMapperByRecursive({source:value,keyMaps,maxDepth,startDepth:startDepth+1,deleOther})
-
+    
         if (newKey === undefined){
-            if (deleOther){
-                continue;
-            }
             newKey = key;
+        }else if(keep){
+            newEntries.push([key,newValue]);
         }
         newEntries.push([newKey,newValue]);
     }
@@ -148,6 +148,8 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     maxDepth?:number|null|undefined;
     deleOther?:boolean|null|undefined;
     reverse?:boolean|null|undefined;
+    //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
+    keep?:boolean|null|undefined;
 }
 
 
