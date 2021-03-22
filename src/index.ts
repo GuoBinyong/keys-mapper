@@ -1,3 +1,4 @@
+import { relative } from "path";
 
 export type Key = string|number|symbol
 export type Keys = Key | Key[];
@@ -180,39 +181,41 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
 
 
         const presetKMO = keyMapper.presetKeyMapsObject;
-        let mergedKMO = presetKMO;
+        let finalKMO = presetKMO;
         if (Object.keys(presetKMO).length > 0 && keyMaps){
-            mergedKMO = mergeKeyMaps(presetKMO,keyMaps);
+            finalKMO = mergeKeyMaps(presetKMO,keyMaps);
+        }
+
+        if (reverse){
+            const reverseKMA = reverseKeyMaps(finalKMO);
+            finalKMO = toKeyMapsObject(reverseKMA);
         }
         
-        const trObj = toTypeReviverObject(mergedTCArr);
-        return keyMapperByRecursive({value,typeReviverObject:trObj,allOwnProps:allOwnProps_Bool,copyFun:copyFun_Bool,maxDepth:maxDepth_Num,startDepth:0,rawCopyMap:new Map()}) as V;
+        return keyMapperByRecursive({...options,source,keyMaps:finalKMO,maxDepth:maxDepth_Num,startDepth:0});
     }
 
 
 
 
-    Object.defineProperty(keyMapper,"presetTypeCopierMap",{
+    Object.defineProperty(keyMapper,"presetKeyMapsObject",{
         configurable:true,
         enumerable:true,
         get:function () {
-            if (!this._presetTypeCopierMap){
-                this._presetTypeCopierMap = new Map();
+            if (!this._presetKeyMapsObject){
+                this._presetKeyMapsObject = {};
             }
-            return this._presetTypeCopierMap;
+            return this._presetKeyMapsObject;
         },
         set:function (newValue) {
-            if (newValue instanceof Map){
-                this._presetTypeCopierMap = newValue;
-            }
+            this._presetKeyMapsObject = newValue;
         }
     });
 
 
 
 
-    if (presetTypeCopierMap){
-        keyMapper.presetTypeCopierMap = presetTypeCopierMap;
+    if (presetKeyMapsObject){
+        keyMapper.presetKeyMapsObject = presetKeyMapsObject;
     }
 
     return keyMapper;
