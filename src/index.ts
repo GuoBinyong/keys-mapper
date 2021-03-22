@@ -1,5 +1,10 @@
 export type Key = string|number|symbol
 export type Keys = Key | Key[];
+/**
+ * 映射的 key
+ * - null ：表示删除当前 key
+ * - undefined ： 没有映射，相关于没有为该key设置映射
+ */
 export type MapKey = Key | null | undefined;
 export type MapKeys = MapKey | MapKey[];
 /**
@@ -146,7 +151,9 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
  export interface KeyMapperOptions {
     // 可选；默认值为：Infinity；拷贝的最大深度；当值为 undefined 或 null 时，会使用默认值，表示无限深度；被拷贝的值本身的深度为 0 ，被拷贝值的成员的深度为 1 ，依次类推；
     maxDepth?:number|null|undefined;
+    // 是否删除 映射之外的 key
     deleOther?:boolean|null|undefined;
+    // 反转 key 映射 
     reverse?:boolean|null|undefined;
     //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
     keep?:boolean|null|undefined;
@@ -158,7 +165,6 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
 export interface KeyMapper {
     /**
      * 键映射
-     * @param value
      */
     (source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any;
 
