@@ -122,19 +122,23 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     const entries = Object.entries(source);
     
     for (const [key,value] of entries ){
-        let newKey = keyMaps[key];
-        if (newKey === null || (newKey === undefined && deleOther)){
+        let newKeys = keyMaps[key];
+        if (newKeys === null || (newKeys === undefined && deleOther)){
             continue;
         }
 
-        const newValue = keyMapperByRecursive({source:value,keyMaps,maxDepth,startDepth:startDepth+1,deleOther})
+        const newValue = keyMapperByRecursive({...options,source:value,startDepth:startDepth+1})
     
-        if (newKey === undefined){
-            newKey = key;
+        if (newKeys === undefined){
+            newKeys = key;
         }else if(keep){
             newEntries.push([key,newValue]);
         }
-        newEntries.push([newKey,newValue]);
+
+        const newKeyArr = Array.isArray(newKeys) ? newKeys : [newKeys];
+        newKeyArr.forEach(function(newKey){
+            newEntries.push([newKey,newValue]);
+        });
     }
 
     return Object.fromEntries(newEntries);
@@ -194,8 +198,12 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
 
         const presetKMO = keyMapper.presetKeyMapsObject;
         let finalKMO = presetKMO;
-        if (Object.keys(presetKMO).length > 0 && keyMaps){
-            finalKMO = mergeKeyMaps(presetKMO,keyMaps);
+        if (keyMaps){
+            if (Object.keys(presetKMO).length > 0){
+                finalKMO = mergeKeyMaps(presetKMO,keyMaps);
+            }else {
+                finalKMO = toKeyMapsObject(keyMaps);
+            }
         }
 
         if (reverse){
