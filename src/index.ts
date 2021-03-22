@@ -176,7 +176,11 @@ export interface KeyMapper {
 
 
 
-
+/**
+ * 创建以 presetKeyMapsObject 为预设的 keyMapper() 函数
+ * @param presetKeyMapsObject 
+ * @returns 
+ */
 export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
 
     function keyMapper(source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any {
@@ -229,3 +233,8 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
     return keyMapper;
 
 }
+
+
+
+
+export const keyMapper:KeyMapper = createKeyMapper();
