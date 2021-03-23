@@ -100,7 +100,7 @@ export function reverseKeyMaps(keyMaps:KeyMaps):KeyMapsArray{
  export type CompleteCB<V> = (copy:V)=>void;
 
 
-interface keyMapperByRecursiveOptions {
+interface KeysMapperByRecursiveOptions {
     source:any;
     keyMaps:KeyMapsObject;
     maxDepth:number;
@@ -124,7 +124,7 @@ interface keyMapperByRecursiveOptions {
  * @param options 
  * @returns 
  */
-function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
+function keysMapperByRecursive(options:KeysMapperByRecursiveOptions):any{
     const {source,keyMaps,maxDepth,startDepth,deleOther,keep,rawCopyMap,completeCB:complete,array:hasArray} = options;
     const completeCB = complete || function () {};
 
@@ -155,7 +155,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
         if  (!hasArray){
             source.forEach(function(value:any,index:number){
                 target.push(undefined);
-                keyMapperByRecursive({...options,source:value,startDepth:nextDepth,
+                keysMapperByRecursive({...options,source:value,startDepth:nextDepth,
                     completeCB:function (newValue) {
                         target.splice(index,1,newValue);
                     }
@@ -185,7 +185,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
         }
         
 
-        keyMapperByRecursive({...options,source:value,startDepth:nextDepth,
+        keysMapperByRecursive({...options,source:value,startDepth:nextDepth,
             completeCB:function (newValue) {
                 if (newKeys === undefined || keep){
                     newKeyArr.push(key);
@@ -215,7 +215,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
 /**
  * keysMapper 函数的配置选项
  */
- export interface KeyMapperOptions {
+ export interface KeysMapperOptions {
     // 可选；默认值为：Infinity；拷贝的最大深度；当值为 undefined 或 null 时，会使用默认值，表示无限深度；被拷贝的值本身的深度为 0 ，被拷贝值的成员的深度为 1 ，依次类推；
     maxDepth?:number|null|undefined;
     // 是否删除 映射之外的 key
@@ -235,7 +235,7 @@ export interface KeysMapper {
     /**
      * 键映射
      */
-    (source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any;
+    (source:any,options?:KeysMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any;
 
     /**
      * 预设的 KeyMapsObject
@@ -250,9 +250,9 @@ export interface KeysMapper {
  * @param presetKeyMapsObject 
  * @returns 
  */
-export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeysMapper {
+export function createKeysMapper(presetKeyMapsObject?:KeyMapsObject):KeysMapper {
 
-    function keysMapper(source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any {
+    function keysMapper(source:any,options?:KeysMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any {
 
         if (options){
             var {maxDepth,reverse} = options
@@ -276,7 +276,7 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeysMapper {
             finalKMO = toKeyMapsObject(reverseKMA);
         }
         
-        return keyMapperByRecursive({...options,source,keyMaps:finalKMO,maxDepth:maxDepth_Num,startDepth:0,rawCopyMap:new Map()});
+        return keysMapperByRecursive({...options,source,keyMaps:finalKMO,maxDepth:maxDepth_Num,startDepth:0,rawCopyMap:new Map()});
     }
 
 
@@ -310,4 +310,4 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeysMapper {
 
 
 
-export const keysMapper:KeysMapper = createKeyMapper();
+export const keysMapper:KeysMapper = createKeysMapper();
