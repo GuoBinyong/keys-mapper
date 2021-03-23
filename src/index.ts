@@ -114,7 +114,7 @@ interface keyMapperByRecursiveOptions {
     //用于保存 被拷贝的对象 和 其对应的 副本 的 Map
     rawCopyMap:Map<any,Decide>;
     completeCB?:CompleteCB<any>|null|undefined;
-    // 是否也要对数组进行键映射 keyMapper
+    // 是否也要对数组进行键映射 keysMapper
     array?:boolean;
 }
 
@@ -213,7 +213,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
 
 
 /**
- * keyMapper 函数的配置选项
+ * keysMapper 函数的配置选项
  */
  export interface KeyMapperOptions {
     // 可选；默认值为：Infinity；拷贝的最大深度；当值为 undefined 或 null 时，会使用默认值，表示无限深度；被拷贝的值本身的深度为 0 ，被拷贝值的成员的深度为 1 ，依次类推；
@@ -224,14 +224,14 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     reverse?:boolean|null|undefined;
     //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
     keep?:boolean|null|undefined;
-    // 是否也要对数组进行键映射 keyMapper
+    // 是否也要对数组进行键映射 keysMapper
     array?:boolean;
 }
 
 
 
 
-export interface KeyMapper {
+export interface KeysMapper {
     /**
      * 键映射
      */
@@ -246,13 +246,13 @@ export interface KeyMapper {
 
 
 /**
- * 创建以 presetKeyMapsObject 为预设的 keyMapper() 函数
+ * 创建以 presetKeyMapsObject 为预设的 keysMapper() 函数
  * @param presetKeyMapsObject 
  * @returns 
  */
-export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
+export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeysMapper {
 
-    function keyMapper(source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any {
+    function keysMapper(source:any,options?:KeyMapperOptions|null|undefined,keyMaps?:KeyMaps|null|undefined):any {
 
         if (options){
             var {maxDepth,reverse} = options
@@ -261,7 +261,7 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
         const maxDepth_Num = maxDepth == null ? Infinity : maxDepth;
 
 
-        const presetKMO = keyMapper.presetKeyMapsObject;
+        const presetKMO = keysMapper.presetKeyMapsObject;
         let finalKMO = presetKMO;
         if (keyMaps){
             if (Object.keys(presetKMO).length > 0){
@@ -282,7 +282,7 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
 
 
 
-    Object.defineProperty(keyMapper,"presetKeyMapsObject",{
+    Object.defineProperty(keysMapper,"presetKeyMapsObject",{
         configurable:true,
         enumerable:true,
         get:function () {
@@ -300,14 +300,14 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
 
 
     if (presetKeyMapsObject){
-        keyMapper.presetKeyMapsObject = presetKeyMapsObject;
+        keysMapper.presetKeyMapsObject = presetKeyMapsObject;
     }
 
-    return keyMapper;
+    return keysMapper;
 
 }
 
 
 
 
-export const keyMapper:KeyMapper = createKeyMapper();
+export const keysMapper:KeysMapper = createKeyMapper();

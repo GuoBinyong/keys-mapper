@@ -17,8 +17,8 @@ let source = {
 source.ref = source;
 source.g = source.w;
 
-let target = KM.keyMapper(source,null,kms);
+let target = KM.keysMapper(source,null,kms);
 console.log(target,target.by === target.xl)
 
-let tar2Sou = KM.keyMapper(target,{reverse:true},kms);
+let tar2Sou = KM.keysMapper(target,{reverse:true},kms);
 console.log(tar2Sou)
