@@ -127,6 +127,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     const completeCB = complete || function () {};
 
     if (maxDepth < startDepth ||  !(source && typeof source === "object")){
+        completeCB(source);
         return source;
     }
 
@@ -142,8 +143,8 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     const entries = Object.entries(source);
     
     for (const [key,value] of entries ){
-        let newKeys = keyMaps[key];
-        const newMapKeyArr = Array.isArray(newKeys) ? newKeys : [newKeys];
+        const newKeys = keyMaps[key];
+        const newMapKeyArr = Array.isArray(newKeys) ? [...newKeys] : [newKeys];
         const newKeyArr = newMapKeyArr.filter(k=>k != null) as Key[];
 
         if (newKeys === null || (newKeys === undefined && deleOther) || (newKeys !== undefined && !keep && newKeyArr.length === 0)){
@@ -153,10 +154,8 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
 
         keyMapperByRecursive({...options,source:value,startDepth:startDepth+1,
             completeCB:function (newValue) {
-                if (newKeys === undefined){
-                    newKeys = key;
-                }else if(keep){
-                    newEntries.push([key,newValue]);
+                if (newKeys === undefined || keep){
+                    newKeyArr.push(key);
                 }
 
                 newKeyArr.forEach(function(newKey){
