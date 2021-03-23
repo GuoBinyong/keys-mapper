@@ -114,6 +114,8 @@ interface keyMapperByRecursiveOptions {
     //用于保存 被拷贝的对象 和 其对应的 副本 的 Map
     rawCopyMap:Map<any,Decide>;
     completeCB?:CompleteCB<any>|null|undefined;
+    // 是否也要对数组进行键映射 keyMapper
+    array?:boolean;
 }
 
 
@@ -123,7 +125,7 @@ interface keyMapperByRecursiveOptions {
  * @returns 
  */
 function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
-    const {source,keyMaps,maxDepth,startDepth,deleOther,keep,rawCopyMap,completeCB:complete} = options;
+    const {source,keyMaps,maxDepth,startDepth,deleOther,keep,rawCopyMap,completeCB:complete,array:hasArray} = options;
     const completeCB = complete || function () {};
 
     if (maxDepth < startDepth ||  !(source && typeof source === "object")){
@@ -138,9 +140,40 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     }
     decide = new Decide<any>();
     decide.then(completeCB);
+    rawCopyMap.set(source,decide);
+
+    const nextDepth = startDepth + 1;
+
 
     const newEntries:[Key,any][] = [];
-    const entries = Object.entries(source);
+    let entries!:[string|number,any][];
+
+    const isArray = Array.isArray(source);
+    const target:any = isArray ? [] : {};
+
+    if(isArray){
+        if  (!hasArray){
+            source.forEach(function(value:any,index:number){
+                target.push(undefined);
+                keyMapperByRecursive({...options,source:value,startDepth:nextDepth,
+                    completeCB:function (newValue) {
+                        target.splice(index,1,newValue);
+                    }
+                });
+            });
+            decide.value = target;
+            return target;
+        }
+
+        entries = (<any[]>source).map(function(item,index){
+            return [index,item];
+        });
+        
+    }else {
+        entries = Object.entries(source);
+    }
+
+    
     
     for (const [key,value] of entries ){
         const newKeys = keyMaps[key];
@@ -152,7 +185,7 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
         }
         
 
-        keyMapperByRecursive({...options,source:value,startDepth:startDepth+1,
+        keyMapperByRecursive({...options,source:value,startDepth:nextDepth,
             completeCB:function (newValue) {
                 if (newKeys === undefined || keep){
                     newKeyArr.push(key);
@@ -165,16 +198,9 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
         });
     }
 
-    let target:any = null;
-    if (Array.isArray(source)){
-        const newValue:any[] = [];
-        for (const [key,value] of newEntries as [number,any][] ){
-            newValue[key] = value;
-        }
-
-        target = newValue;
-    }else {
-        target = Object.fromEntries(newEntries);
+    
+    for (const [key,value] of newEntries ){
+        target[key] = value;
     }
 
     decide.value = target;
@@ -198,6 +224,8 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     reverse?:boolean|null|undefined;
     //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
     keep?:boolean|null|undefined;
+    // 是否也要对数组进行键映射 keyMapper
+    array?:boolean;
 }
 
 
