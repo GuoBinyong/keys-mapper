@@ -114,7 +114,7 @@ interface keyMapperByRecursiveOptions {
 function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
     const {source,keyMaps,maxDepth,startDepth,deleOther,keep} = options;
 
-    if (maxDepth < startDepth ||  !(source && typeof source === "object") || Array.isArray(source) ){
+    if (maxDepth < startDepth ||  !(source && typeof source === "object")){
         return source;
     }
 
@@ -139,6 +139,14 @@ function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
         newKeyArr.forEach(function(newKey){
             newEntries.push([newKey,newValue]);
         });
+    }
+
+    if (Array.isArray(source)){
+        const newValue = [];
+        for (const [key,value] of newEntries ){
+            newValue[key] = value;
+        }
+        return newValue;
     }
 
     return Object.fromEntries(newEntries);
