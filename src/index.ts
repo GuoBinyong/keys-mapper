@@ -1,3 +1,5 @@
+import {Decide} from "com-tools"
+
 export type Key = string|number|symbol
 export type Keys = Key | Key[];
 /**
@@ -92,6 +94,11 @@ export function reverseKeyMaps(keyMaps:KeyMaps):KeyMapsArray{
 }
 
 
+/**
+ * 完成的回调函数
+ */
+ export type CompleteCB<V> = (copy:V)=>void;
+
 
 interface keyMapperByRecursiveOptions {
     source:any;
@@ -103,6 +110,10 @@ interface keyMapperByRecursiveOptions {
 
     //保持原来的 key，即不删除原来的key；默认值：false；默认情况会删除原来的key；
     keep?:boolean|null|undefined;
+
+    //用于保存 被拷贝的对象 和 其对应的 副本 的 Map
+    rawCopyMap:Map<any,Decide>;
+    completeCB?:CompleteCB<any>|null|undefined;
 }
 
 
@@ -112,44 +123,63 @@ interface keyMapperByRecursiveOptions {
  * @returns 
  */
 function keyMapperByRecursive(options:keyMapperByRecursiveOptions):any{
-    const {source,keyMaps,maxDepth,startDepth,deleOther,keep} = options;
+    const {source,keyMaps,maxDepth,startDepth,deleOther,keep,rawCopyMap,completeCB:complete} = options;
+    const completeCB = complete || function () {};
 
     if (maxDepth < startDepth ||  !(source && typeof source === "object")){
         return source;
     }
 
-    const newEntries = [];
+    let decide = rawCopyMap.get(source);
+    if (decide){
+        decide.then(completeCB);
+        return decide.value
+    }
+    decide = new Decide<any>();
+    decide.then(completeCB);
+
+    const newEntries:[Key,any][] = [];
     const entries = Object.entries(source);
     
     for (const [key,value] of entries ){
         let newKeys = keyMaps[key];
-        if (newKeys === null || (newKeys === undefined && deleOther)){
+        const newMapKeyArr = Array.isArray(newKeys) ? newKeys : [newKeys];
+        const newKeyArr = newMapKeyArr.filter(k=>k != null) as Key[];
+
+        if (newKeys === null || (newKeys === undefined && deleOther) || (newKeys !== undefined && !keep && newKeyArr.length === 0)){
             continue;
         }
+        
 
-        const newValue = keyMapperByRecursive({...options,source:value,startDepth:startDepth+1})
-    
-        if (newKeys === undefined){
-            newKeys = key;
-        }else if(keep){
-            newEntries.push([key,newValue]);
-        }
+        keyMapperByRecursive({...options,source:value,startDepth:startDepth+1,
+            completeCB:function (newValue) {
+                if (newKeys === undefined){
+                    newKeys = key;
+                }else if(keep){
+                    newEntries.push([key,newValue]);
+                }
 
-        const newKeyArr = Array.isArray(newKeys) ? newKeys : [newKeys];
-        newKeyArr.forEach(function(newKey){
-            newEntries.push([newKey,newValue]);
+                newKeyArr.forEach(function(newKey){
+                    newEntries.push([newKey,newValue]);
+                });
+            }
         });
     }
 
+    let target:any = null;
     if (Array.isArray(source)){
-        const newValue = [];
-        for (const [key,value] of newEntries ){
+        const newValue:any[] = [];
+        for (const [key,value] of newEntries as [number,any][] ){
             newValue[key] = value;
         }
-        return newValue;
+
+        target = newValue;
+    }else {
+        target = Object.fromEntries(newEntries);
     }
 
-    return Object.fromEntries(newEntries);
+    decide.value = target;
+    return target;
 }
 
 
@@ -219,7 +249,7 @@ export function createKeyMapper(presetKeyMapsObject?:KeyMapsObject):KeyMapper {
             finalKMO = toKeyMapsObject(reverseKMA);
         }
         
-        return keyMapperByRecursive({...options,source,keyMaps:finalKMO,maxDepth:maxDepth_Num,startDepth:0});
+        return keyMapperByRecursive({...options,source,keyMaps:finalKMO,maxDepth:maxDepth_Num,startDepth:0,rawCopyMap:new Map()});
     }
 
 
