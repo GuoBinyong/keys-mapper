@@ -1,6 +1,6 @@
 {
   "name": "keys-mapper",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "keys-mapper 是一个通过设置属性名字映射，就可将一个对象转换成另一个对象的工具；支持循环引用、反向映射、深度映射",
   "main": "dist/keys-mapper.cjs.js",
   "module": "dist/keys-mapper.es.js",
