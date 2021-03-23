@@ -1,7 +1,7 @@
 {
   "name": "keys-mapper",
   "version": "0.0.0",
-  "description": "keys-mapper",
+  "description": "keys-mapper 是一个通过设置属性名字映射，就可将一个对象转换成另一个对象的工具；支持循环引用、反向映射、深度映射",
   "main": "dist/keys-mapper.cjs.js",
   "module": "dist/keys-mapper.es.js",
   "types": "types/index.d.ts",
@@ -11,7 +11,29 @@
     "type": "git",
     "url": "https://github.com/GuoBinyong/keys-mapper"
   },
-  "keywords": [],
+  "keywords": [
+    "key mapper",
+    "key map",
+    "reverse mapping",
+    "loop reference",
+    "deep mapping",
+    "property map",
+    "member map",
+    "object map",
+    "object transformation",
+    "member transformation",
+    "property transformation",
+    "key transformation",
+    "键映射",
+    "属性映射",
+    "成员映射",
+    "对象映射",
+    "成员转换",
+    "循环引用",
+    "返回映射",
+    "逆向映射",
+    "深度映射"
+  ],
   "author": {
     "name": "郭斌勇",
     "email": "guobinyong@qq.com"
